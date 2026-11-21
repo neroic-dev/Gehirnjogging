@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Kopfjogging</title>
+<style>
+:root{--bg:#f1efe8;--ds:#d3d1c7;--scr:#ffffff;--hinge:#b4b2a9;--txt:#2c2c2a;--mut:#5f5e5a;--acc:#185FA5;--ok:#3B6D11;--bad:#A32D2D;--warn:#854F0B;--btn:#f7f6f2;--brd:#b4b2a9}
+@media (prefers-color-scheme:dark){:root{--bg:#1a1a19;--ds:#2c2c2a;--scr:#232322;--hinge:#444441;--txt:#f1efe8;--mut:#b4b2a9;--acc:#85B7EB;--ok:#97C459;--bad:#F09595;--warn:#FAC775;--btn:#2c2c2a;--brd:#5f5e5a}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;user-select:none;-webkit-user-select:none}
+body{display:flex;align-items:center;justify-content:center;padding:16px}
+.ds{background:var(--ds);border-radius:20px;padding:14px;width:100%;max-width:420px}
+.scr{background:var(--scr);border:1px solid var(--brd);border-radius:10px;padding:16px;min-height:210px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.hinge{height:16px;margin:8px 36px;border-radius:5px;background:var(--hinge)}
+.pad{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+.one{grid-template-columns:1fr}
+.three{grid-template-columns:1fr 1fr 1fr;gap:6px}
+button{height:52px;font-size:18px;font-family:inherit;color:var(--txt);background:var(--btn);border:1px solid var(--brd);border-radius:8px}
+button:active{transform:scale(.97)}
+.big{font-size:38px;font-weight:500;letter-spacing:1px;line-height:1.2}
+.title{font-size:24px;font-weight:500;margin:4px 0}
+.mut{font-size:14px;color:var(--mut)}
+.bar{height:6px;background:var(--bg);border-radius:4px;width:100%;margin-top:10px;overflow:hidden}
+.bar div{height:100%;background:var(--acc);width:0}
+.inp{font-size:28px;font-weight:500;height:40px;margin-bottom:8px;border-bottom:1px solid var(--brd);width:100%}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px}
+</style>
+</head>
+<body>
+<div class="ds">
+  <div class="scr" id="top"></div>
+  <div class="hinge"></div>
+  <div class="scr" id="bot"></div>
+</div>
+<script>
+var T=document.getElementById('top'),B=document.getElementById('bot');
+var level=1,mode='test',scores=[],queue=[];
+function r(a,b){return Math.floor(Math.random()*(b-a+1))+a}
+function shuffle(a){return a.sort(function(){return Math.random()-0.5})}
+function getBest(l){try{var v=localStorage.getItem('best'+l);return v?+v:null}catch(e){return null}}
+function setBest(l,v){try{localStorage.setItem('best'+l,v)}catch(e){}}
+
+var COLS=[{n:'Rot',c:'#E24B4A'},{n:'Blau',c:'#378ADD'},{n:'Grün',c:'#639922'},{n:'Gelb',c:'#EF9F27'}];
+var LEVELS={
+  1:{names:['Kopfrechnen','Farbwörter','Zahlen merken'],
+     desc:['15 Aufgaben – so schnell wie möglich lösen','Tippe die Farbe der Schrift, nicht das Wort','Merke dir die Ziffern und tippe sie ein'],
+     games:function(){return [math,stroop,memo]},base:80,f:0.6},
+  2:{names:['Kettenrechnen','Uhr ablesen','Rückwärts merken'],
+     desc:['12 Aufgaben mit zwei Rechenschritten – Punkt vor Strich','Welche Uhrzeit zeigt die Uhr?','Merke dir die Ziffern und tippe sie rückwärts ein'],
+     games:function(){return [chain,clock,rev]},base:75,f:0.55}
+};
+
+function menu(){
+  var b1=getBest(1),b2=getBest(2);
+  T.innerHTML='<div class="mut">Gehirntraining</div><div class="title">Kopfjogging</div>'+
+    '<div class="mut">Bestes Gehirnalter<br>Level 1: '+(b1||'–')+' · Level 2: '+(b2||'–')+'</div>';
+  B.innerHTML='<div class="pad one"><button onclick="levelMenu(1)">Level 1 · Einsteiger</button><button onclick="levelMenu(2)">Level 2 · Profi</button></div>';
+}
+function levelMenu(l){
+  level=l;var L=LEVELS[l],best=getBest(l);
+  T.innerHTML='<div class="mut">Level '+l+(best?' · Rekord: '+best+' Jahre':'')+'</div><div class="title">'+(l===1?'Einsteiger':'Profi')+'</div><div class="mut">Drei Übungen, dann dein Gehirnalter</div>';
+  B.innerHTML='<div class="pad one"><button onclick="startTest()">Gehirnalter-Test starten</button>'+
+    L.names.map(function(n,i){return '<button onclick="solo('+i+')">Nur '+n+'</button>'}).join('')+
+    '<button onclick="menu()">← Zurück</button></div>';
+}
+function startTest(){mode='test';scores=[];queue=[0,1,2];next()}
+function solo(i){mode='solo';scores=[];queue=[i];next()}
+function next(){if(!queue.length)return finish();intro(queue.shift())}
+function intro(g){
+  var L=LEVELS[level];
+  T.innerHTML='<div class="mut">Übung</div><div class="title">'+L.names[g]+'</div><div class="mut" style="margin-top:6px">'+L.desc[g]+'</div>';
+  var n=3;B.innerHTML='<div class="big" id="cd">3</div>';
+  var iv=setInterval(function(){n--;if(n>0)document.getElementById('cd').textContent=n;else{clearInterval(iv);L.games()[g]()}},700);
+}
+function numpad(onOk){
+  B.innerHTML='<div style="width:100%"><div class="inp" id="inp"></div><div class="pad three" id="np"></div></div>';
+  var np=document.getElementById('np'),inp=document.getElementById('inp'),v='';
+  ['1','2','3','4','5','6','7','8','9','⌫','0','OK'].forEach(function(k){
+    var b=document.createElement('button');b.textContent=k;
+    b.onclick=function(){
+      if(k==='⌫')v=v.slice(0,-1);
+      else if(k==='OK'){if(v!=='')onOk(v,function(){v='';inp.textContent=''})}
+      else if(v.length<10)v+=k;
+      inp.textContent=v;
+    };np.appendChild(b);
+  });
+}
+function progress(i,N){return '<div class="bar"><div style="width:'+(i/N*100)+'%"></div></div>'}
+function feedback(right,line){
+  T.innerHTML='<div style="font-size:20px;font-weight:500;color:var(--'+(right?'ok':'bad')+')">'+(right?'✓ Richtig':'✗ Leider falsch')+'</div><div class="mut">'+line+'</div>';
+  B.innerHTML='';
+}
+
+/* Level 1 */
+function math(){var N=15,i=0,ok=0,t0=Date.now(),sol;
+  function gen(){var op=r(0,2),a,b,s,q;
+    if(op===0){a=r(2,49);b=r(2,49);s=a+b;q=a+' + '+b}
+    else if(op===1){a=r(10,60);b=r(1,a);s=a-b;q=a+' − '+b}
+    else{a=r(2,9);b=r(2,9);s=a*b;q=a+' × '+b}
+    T.innerHTML='<div class="mut">Aufgabe '+(i+1)+' von '+N+'</div><div class="big" style="margin:10px 0">'+q+' = ?</div>'+progress(i,N);return s}
+  sol=gen();
+  numpad(function(v,clr){if(+v===sol)ok++;i++;clr();if(i<N)sol=gen();else{var s=(Date.now()-t0)/1000;
+    var pts=Math.max(0,Math.min(100,ok/N*100-Math.max(0,s-25)*1.2));scores.push(pts);result('Kopfrechnen',ok+' / '+N+' richtig',s.toFixed(1)+' Sekunden',pts)}});
+}
+function stroop(){var N=12,i=0,ok=0,t0=Date.now(),cur;
+  function gen(){var w=r(0,3),c=r(0,3);if(Math.random()<0.75)while(c===w)c=r(0,3);cur=c;
+    T.innerHTML='<div class="mut">Welche Farbe hat die Schrift? '+(i+1)+'/'+N+'</div><div class="big" style="margin:12px 0;color:'+COLS[c].c+'">'+COLS[w].n+'</div>'+progress(i,N)}
+  B.innerHTML='<div class="pad" id="sp"></div>';var sp=document.getElementById('sp');
+  COLS.forEach(function(c,k){var b=document.createElement('button');b.innerHTML='<span class="dot" style="background:'+c.c+'"></span>'+c.n;
+    b.onclick=function(){if(k===cur)ok++;i++;if(i<N)gen();else{var s=(Date.now()-t0)/1000;
+      var pts=Math.max(0,Math.min(100,ok/N*100-Math.max(0,s-12)*2));scores.push(pts);result('Farbwörter',ok+' / '+N+' richtig',s.toFixed(1)+' Sekunden',pts)}};sp.appendChild(b)});
+  gen();
+}
+function memoGame(name,reverse,speed){var lens=[4,5,6,7,8],i=0,ok=0,maxL=0;
+  function round(){var L=lens[i],d='';for(var k=0;k<L;k++)d+=r(0,9);
+    var want=reverse?d.split('').reverse().join(''):d;
+    T.innerHTML='<div class="mut">Merken! Runde '+(i+1)+'/5</div><div class="big" style="margin:10px 0">'+d.split('').join(' ')+'</div><div class="bar"><div id="mb" style="width:100%;transition:width '+(L*speed)+'s linear"></div></div>';
+    B.innerHTML='<div class="mut">Gut einprägen …'+(reverse?' gleich rückwärts!':'')+'</div>';
+    setTimeout(function(){var mb=document.getElementById('mb');if(mb)mb.style.width='0'},50);
+    setTimeout(function(){
+      T.innerHTML='<div class="mut">'+(reverse?'Jetzt rückwärts eintippen':'Wie lautete die Zahl?')+' ('+L+' Ziffern)</div><div class="big" style="margin:10px 0">'+Array(L+1).join('_ ')+'</div>'+(reverse?'<div class="mut">← letzte Ziffer zuerst</div>':'');
+      numpad(function(v){var right=v===want;if(right){ok++;maxL=L}
+        feedback(right,reverse?'Gezeigt: '+d+' · Rückwärts: '+want:'Gesucht war '+d);
+        i++;setTimeout(function(){if(i<lens.length)round();else{var pts=ok/5*100;scores.push(pts);
+          result(name,ok+' / 5 Runden',maxL?'Längste Zahl: '+maxL+' Ziffern':'Weiter üben',pts)}},1300)});
+    },L*speed*1000+400);
+  }
+  round();
+}
+function memo(){memoGame('Zahlen merken',false,0.6)}
+
+/* Level 2 */
+function chain(){var N=12,i=0,ok=0,t0=Date.now(),sol;
+  function gen(){var a,b,c,q,s,t=r(0,3);
+    if(t===0){a=r(3,12);b=r(3,9);c=r(5,40);s=a*b+c;q=a+' × '+b+' + '+c}
+    else if(t===1){a=r(4,12);b=r(4,9);c=r(1,a*b-1);s=a*b-c;q=a+' × '+b+' − '+c}
+    else if(t===2){b=r(3,9);var x=r(3,12);a=b*x;c=r(10,60);s=x+c;q=c+' + '+a+' : '+b}
+    else{a=r(20,90);b=r(11,49);c=r(5,30);s=a+b-c;q=a+' + '+b+' − '+c}
+    T.innerHTML='<div class="mut">Aufgabe '+(i+1)+' von '+N+'</div><div class="big" style="margin:10px 0">'+q+'</div>'+progress(i,N);return s}
+  sol=gen();
+  numpad(function(v,clr){if(+v===sol)ok++;i++;clr();if(i<N)sol=gen();else{var s=(Date.now()-t0)/1000;
+    var pts=Math.max(0,Math.min(100,ok/N*100-Math.max(0,s-45)*0.9));scores.push(pts);result('Kettenrechnen',ok+' / '+N+' richtig',s.toFixed(1)+' Sekunden',pts)}});
+}
+function fmt(h,m){return h+':'+(m<10?'0':'')+m}
+function face(h,m){var ma=m*6,ha=(h%12)*30+m*0.5,ticks='';
+  for(var k=0;k<12;k++){var a=k*30*Math.PI/180;
+    ticks+='<line x1="'+(60+46*Math.sin(a))+'" y1="'+(60-46*Math.cos(a))+'" x2="'+(60+52*Math.sin(a))+'" y2="'+(60-52*Math.cos(a))+'" stroke="currentColor" stroke-width="'+(k%3?1.5:3)+'"/>'}
+  return '<svg width="150" height="150" viewBox="0 0 120 120" style="color:var(--txt)"><circle cx="60" cy="60" r="56" fill="none" stroke="currentColor" stroke-width="2"/>'+ticks+
+    '<line x1="60" y1="60" x2="60" y2="30" stroke="currentColor" stroke-width="5" stroke-linecap="round" transform="rotate('+ha+' 60 60)"/>'+
+    '<line x1="60" y1="60" x2="60" y2="14" stroke="#378ADD" stroke-width="3" stroke-linecap="round" transform="rotate('+ma+' 60 60)"/>'+
+    '<circle cx="60" cy="60" r="4" fill="currentColor"/></svg>'}
+function clock(){var N=10,i=0,ok=0,t0=Date.now();
+  function gen(){var h=r(1,12),m=r(0,11)*5,right=fmt(h,m),seen={},opts=[right];seen[right]=1;
+    var cands=shuffle([fmt(m/5||12,h*5%60),fmt(h%12+1,m),fmt(h,(m+30)%60),fmt(h===1?12:h-1,m),fmt(h,(m+5)%60),fmt(h,(m+55)%60)]);
+    cands.forEach(function(c){if(!seen[c]&&opts.length<4){seen[c]=1;opts.push(c)}});shuffle(opts);
+    T.innerHTML='<div class="mut">Wie spät ist es? '+(i+1)+'/'+N+'</div>'+face(h,m);
+    B.innerHTML='<div class="pad" id="cp"></div>';var cp=document.getElementById('cp');
+    opts.forEach(function(o){var b=document.createElement('button');b.textContent=o+' Uhr';
+      b.onclick=function(){if(o===right)ok++;i++;if(i<N)gen();else{var s=(Date.now()-t0)/1000;
+        var pts=Math.max(0,Math.min(100,ok/N*100-Math.max(0,s-30)*1.2));scores.push(pts);result('Uhr ablesen',ok+' / '+N+' richtig',s.toFixed(1)+' Sekunden',pts)}};cp.appendChild(b)});
+  }
+  gen();
+}
+function rev(){memoGame('Rückwärts merken',true,0.7)}
+
+function result(n,a,b,pts){
+  T.innerHTML='<div class="mut">'+n+'</div><div class="title">'+a+'</div><div class="mut">'+b+'</div><div style="margin-top:8px;font-size:16px">Punkte: '+Math.round(pts)+' / 100</div>';
+  B.innerHTML='<div class="pad one"><button onclick="next()">'+(queue.length?'Nächste Übung →':(mode==='test'?'Gehirnalter anzeigen →':'Fertig'))+'</button></div>';
+}
+function finish(){
+  if(mode!=='test')return levelMenu(level);
+  var L=LEVELS[level],avg=scores.reduce(function(a,b){return a+b},0)/scores.length;
+  var age=Math.round(Math.max(20,Math.min(80,L.base-avg*L.f))),best=getBest(level),cmp;
+  if(best===null)cmp='Dein erster Rekord auf Level '+level;
+  else if(age<best)cmp='<span style="color:var(--ok)">Neuer Rekord – '+(best-age)+' Jahre jünger</span>';
+  else if(age===best)cmp='Genau dein Rekord';
+  else cmp='<span style="color:var(--warn)">Rekord: '+best+' Jahre – weiter üben</span>';
+  if(best===null||age<best)setBest(level,age);
+  T.innerHTML='<div class="mut">Dein Gehirnalter (Level '+level+')</div><div style="font-size:60px;font-weight:500;color:var(--acc);line-height:1.1">'+age+'</div><div class="mut">Jahre</div><div style="margin-top:8px;font-size:15px">'+cmp+'</div>';
+  B.innerHTML='<div class="pad one"><button onclick="startTest()">↻ Nochmal versuchen</button><button onclick="levelMenu(level)">Zum Level-Menü</button><button onclick="menu()">Hauptmenü</button></div>';
+}
+menu();
+</script>
+</body>
+</html>
