@@ -71,6 +71,31 @@ a:hover h4,a:hover h2{text-decoration:underline;text-decoration-thickness:1px;te
 
 footer{margin-top:24px;border-top:3px double var(--rule);padding-top:10px;font-size:13px;color:var(--mute);text-align:center;font-style:italic}
 
+/* Leseansicht */
+body.reading{overflow:hidden}
+.reader{position:fixed;inset:0;z-index:8;background:var(--paper);overflow-y:auto;-webkit-overflow-scrolling:touch}
+.rdbar{position:sticky;top:0;background:var(--paper);display:flex;justify-content:space-between;align-items:center;max-width:720px;margin:0 auto;padding:0 max(4vw,10px);border-bottom:1px solid var(--rule)}
+.rdbar span{font:400 24px/1 "UnifrakturMaguntia",serif;padding-right:6px}
+.rd{max-width:720px;margin:0 auto;padding:22px max(5vw,18px) 64px;border:0}
+.rd .kicker{font-variant:small-caps;letter-spacing:.06em;font-size:14px;color:var(--mute);text-align:center}
+.rd h1{font:900 clamp(30px,6.4vw,48px)/1.06 "Playfair Display",Georgia,serif;margin:8px 0 12px;text-align:center;text-wrap:balance}
+.rd>.meta{text-align:center;padding-bottom:16px;border-bottom:3px double var(--rule);margin-bottom:18px}
+.rd .text{font-size:18.5px;line-height:1.6;hyphens:auto;text-align:justify;overflow-wrap:break-word}
+.rd .text>p:first-child::first-letter{float:left;font:900 3.6em/.8 "Playfair Display",serif;padding:7px 8px 0 0}
+.rd .text p{margin:0 0 .9em}
+.rd .text h3,.rd .text h4{font:700 22px/1.2 "Playfair Display",serif;margin:1.4em 0 .5em;text-align:left}
+.rd .text h4{font-size:19px}
+.rd .text blockquote{margin:1.2em 0;padding:0 0 0 16px;border-left:2px solid var(--rule);font-style:italic}
+.rd .text ul,.rd .text ol{padding-left:1.3em;text-align:left}
+.rd .text a{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+.rd .text table{border-collapse:collapse;font-size:15px;display:block;overflow-x:auto}
+.rd .text td,.rd .text th{border-bottom:1px solid var(--hair);padding:6px 8px;text-align:left}
+.rd .text pre{overflow-x:auto;font-size:14px}
+.rd .text hr{border:0;border-top:1px solid var(--hair)}
+.rd .note{font-size:14px;font-style:italic;color:var(--mute);border-top:1px solid var(--hair);padding-top:12px;margin-top:20px}
+.rd .orig{display:block;margin-top:18px;padding:12px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);text-align:center;font-variant:small-caps;letter-spacing:.05em}
+@media(max-width:600px){.rd .text{text-align:left}}
+
 /* Einstellungen */
 .dlg{position:fixed;inset:0;background:rgb(0 0 0 / .45);display:none;align-items:flex-start;justify-content:center;padding:4vh 12px;z-index:9;overflow-y:auto}
 .dlg.open{display:flex}
@@ -110,6 +135,11 @@ select{padding-right:6px}
   <div class="status" id="status" role="status"></div>
   <main id="main"></main>
   <footer id="foot"></footer>
+</div>
+
+<div class="reader" id="reader" hidden role="dialog" aria-modal="true" aria-label="Artikel">
+  <div class="rdbar"><button class="icon" id="rdClose" type="button">← Zurück</button><span>Das Blatt</span></div>
+  <article class="rd" id="rdBody"></article>
 </div>
 
 <div class="dlg" id="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgTitle">
@@ -168,11 +198,12 @@ const PUBLIC_PROXIES = [
 const $ = id => document.getElementById(id);
 const store = {
   get(k, d){ try{ const v = localStorage.getItem("blatt:"+k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
-  set(k, v){ try{ localStorage.setItem("blatt:"+k, JSON.stringify(v)); }catch(e){} }
+  set(k, v){ try{ localStorage.setItem("blatt:"+k, JSON.stringify(v)); return true; }catch(e){ return false; } }
 };
 let feeds = store.get("feeds", DEFAULT_FEEDS);
 let proxy = store.get("proxy", "");
-let items = store.get("cache", []);
+let items = store.get("cache2", []);
+try{ localStorage.removeItem("blatt:cache"); }catch(e){}
 let fetchedAt = store.get("fetchedAt", 0);
 let readSet = new Set(store.get("read", []));
 let current = location.hash.slice(1) || "alle";
@@ -243,21 +274,73 @@ const plain = html => {
   const t = new DOMParser().parseFromString(html, "text/html").body.textContent || "";
   return t.replace(/\s+/g," ").trim();
 };
+/* Volltext: alle Textfelder des Eintrags holen und den längsten nehmen */
+function rawFields(n){
+  const out = [];
+  for(const name of ["content:encoded","content","description","summary","media:description"]){
+    for(const el of n.getElementsByTagName(name)){
+      if(el.getAttribute("type") === "xhtml"){
+        out.push([...el.childNodes].map(c => new XMLSerializer().serializeToString(c)).join(""));
+      } else if(el.textContent.trim()) out.push(el.textContent.trim());
+    }
+  }
+  return out;
+}
+const KEEP = {P:"p",BR:"br",H1:"h3",H2:"h3",H3:"h3",H4:"h4",H5:"h4",H6:"h4",UL:"ul",OL:"ol",LI:"li",
+  BLOCKQUOTE:"blockquote",STRONG:"strong",B:"strong",EM:"em",I:"em",A:"a",FIGCAPTION:"p",PRE:"pre",CODE:"code",
+  TABLE:"table",THEAD:"thead",TBODY:"tbody",TR:"tr",TD:"td",TH:"th",SUB:"sub",SUP:"sup",HR:"hr"};
+const DROP = new Set(["SCRIPT","STYLE","IFRAME","IMG","PICTURE","SOURCE","VIDEO","AUDIO","SVG","NOSCRIPT","FORM","BUTTON","INPUT","OBJECT","EMBED"]);
+const BLOCKS = /^(P|DIV|SECTION|ARTICLE|UL|OL|LI|H[1-6]|BLOCKQUOTE|TABLE|FIGURE|PRE|HR)$/;
+function sanitize(html){
+  const src = new DOMParser().parseFromString(html, "text/html").body;
+  const out = document.createElement("div");
+  const walk = (node, into) => {
+    for(const c of [...node.childNodes]){
+      if(c.nodeType === 3){ into.appendChild(document.createTextNode(c.textContent)); continue; }
+      if(c.nodeType !== 1 || DROP.has(c.tagName)) continue;
+      const tag = KEEP[c.tagName] || (/^(DIV|SECTION|ARTICLE|HEADER|FOOTER)$/.test(c.tagName)
+        && ![...c.children].some(k => BLOCKS.test(k.tagName)) && c.textContent.trim() ? "p" : null);
+      if(!tag){ walk(c, into); continue; }
+      const el = document.createElement(tag);
+      if(tag === "a"){
+        const h = c.getAttribute("href") || "";
+        if(!/^https?:/i.test(h)){ walk(c, into); continue; }
+        el.setAttribute("href", h); el.setAttribute("target", "_blank"); el.setAttribute("rel", "noopener");
+      }
+      walk(c, el);
+      if(!/^(br|hr)$/.test(tag) && !el.textContent.trim()) continue;
+      into.appendChild(el);
+    }
+  };
+  walk(src, out);
+  // Reiner Text ohne Absätze: an Zeilenumbrüchen in Absätze teilen
+  if(!out.querySelector("p,h3,h4,ul,ol,blockquote,table,pre")){
+    const text = out.textContent.trim();
+    const parts = text.split(/\n\s*\n|\r?\n/).map(s => s.trim()).filter(Boolean);
+    return parts.map(p => "<p>" + esc(p) + "</p>").join("");
+  }
+  return out.innerHTML;
+}
+
 function parse(xml, feed){
   const doc = new DOMParser().parseFromString(xml, "text/xml");
   if(doc.getElementsByTagName("parsererror").length) throw new Error("unlesbar");
   const nodes = [...doc.getElementsByTagName("item"), ...doc.getElementsByTagName("entry")];
-  return nodes.slice(0, 25).map(n => {
+  return nodes.slice(0, 30).map(n => {
     let link = "";
     const links = [...n.getElementsByTagName("link")];
     const alt = links.find(l => l.getAttribute("href") && (!l.getAttribute("rel") || l.getAttribute("rel") === "alternate"));
     link = alt ? alt.getAttribute("href") : (links[0]?.textContent.trim() || pick(n, ["guid"]));
     const dateStr = pick(n, ["pubDate","published","updated","dc:date"]);
-    let desc = plain(pick(n, ["description","summary","content:encoded","content"]));
+    const fields = rawFields(n).sort((a, b) => plain(b).length - plain(a).length);
+    const body = fields.length ? sanitize(fields[0]) : "";
+    const full = plain(body);
+    let desc = full;
     if(desc.length > 340) desc = desc.slice(0, 330).replace(/\s\S*$/, "") + " …";
     return {
       title: plain(pick(n, ["title"])) || "Ohne Titel",
-      link, desc,
+      link, desc, body, len: full.length,
+      author: plain(pick(n, ["dc:creator","name","author"])),
       t: Date.parse(dateStr) || 0,
       src: feed.name, sec: feed.sec
     };
@@ -281,7 +364,8 @@ async function load(){
   }
   if(fresh.length){
     items = fresh; fetchedAt = Date.now();
-    store.set("cache", items.slice(0, 400)); store.set("fetchedAt", fetchedAt);
+    for(const n of [300, 150, 60]){ if(store.set("cache2", items.slice(0, n))) break; }
+    store.set("fetchedAt", fetchedAt);
   }
   $("status").textContent = failed.length
     ? (failed.length === feeds.length ? "Keine Quelle erreichbar – es wird die letzte Ausgabe gezeigt." : "Nicht erreichbar: " + failed.join(", ") + ".")
@@ -363,15 +447,42 @@ $("nav").addEventListener("click", e => {
 });
 $("main").addEventListener("click", e => {
   const a = e.target.closest("a[data-link]"); if(!a) return;
+  const item = items.find(i => i.link === a.dataset.link);
   readSet.add(a.dataset.link); a.classList.add("read");
   store.set("read", [...readSet].slice(-600));
+  if(item){ e.preventDefault(); openReader(item); }
 });
+
+/* Leseansicht mit dem kompletten Feed-Text */
+let readerScroll = 0;
+function openReader(i){
+  const d = i.t ? new Date(i.t).toLocaleString("de-DE",{weekday:"long",day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"}) + " Uhr" : "";
+  const body = i.body || (i.desc ? "<p>" + esc(i.desc) + "</p>" : "");
+  const short = (i.len ?? (i.desc || "").length) < 600;
+  $("rdBody").innerHTML = `
+    <div class="kicker">${esc(i.sec)} · ${esc(i.src)}</div>
+    <h1>${esc(i.title)}</h1>
+    <div class="meta">${[i.author, d].filter(Boolean).map(esc).join(" · ")}</div>
+    <div class="text">${body || "<p><em>Dieser Feed liefert zu dieser Meldung keinen Text.</em></p>"}</div>
+    ${short ? `<p class="note">Mehr Text liefert ${esc(i.src)} in seinem Feed nicht.</p>` : ""}
+    <a class="orig" href="${esc(i.link)}" target="_blank" rel="noopener">Originalartikel bei ${esc(i.src)} öffnen →</a>`;
+  readerScroll = window.scrollY;
+  $("reader").hidden = false; $("reader").scrollTop = 0;
+  document.body.classList.add("reading");
+  $("rdClose").focus({preventScroll: true});
+}
+function closeReader(){
+  $("reader").hidden = true;
+  document.body.classList.remove("reading");
+  window.scrollTo({top: readerScroll});
+}
+$("rdClose").addEventListener("click", closeReader);
 $("reload").addEventListener("click", load);
 $("openSettings").addEventListener("click", openSettings);
 $("closeSettings").addEventListener("click", closeSettings);
 $("saveSettings").addEventListener("click", closeSettings);
 $("dlg").addEventListener("click", e => { if(e.target === $("dlg")) closeSettings(); });
-document.addEventListener("keydown", e => { if(e.key === "Escape" && $("dlg").classList.contains("open")) closeSettings(); });
+document.addEventListener("keydown", e => { if(e.key === "Escape") window.back(); });
 $("feedList").addEventListener("change", e => {
   const k = e.target.dataset.k; if(k === undefined) return;
   feeds[k].sec = e.target.value;
@@ -393,6 +504,7 @@ document.addEventListener("visibilitychange", () => { if(!document.hidden && Dat
 
 /* Zurück-Taste (aus der App aufgerufen): true = behandelt */
 window.back = () => {
+  if(!$("reader").hidden){ closeReader(); return true; }
   if($("dlg").classList.contains("open")){ closeSettings(); return true; }
   if(current !== "alle"){ current = "alle"; render(); window.scrollTo({top: 0}); return true; }
   return false;
@@ -403,7 +515,7 @@ window.back = () => {
   let y0 = null, dy = 0;
   const ptr = $("ptr");
   window.addEventListener("touchstart", e => {
-    if(window.scrollY <= 0 && !$("dlg").classList.contains("open")) y0 = e.touches[0].clientY; else y0 = null;
+    if(window.scrollY <= 0 && $("reader").hidden && !$("dlg").classList.contains("open")) y0 = e.touches[0].clientY; else y0 = null;
   }, {passive: true});
   window.addEventListener("touchmove", e => {
     if(y0 === null) return;
