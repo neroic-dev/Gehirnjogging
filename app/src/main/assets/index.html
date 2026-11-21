@@ -2,185 +2,424 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Kopfjogging</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f3f1ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Das Blatt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Playfair+Display:wght@700;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f1efe8;--ds:#d3d1c7;--scr:#ffffff;--hinge:#b4b2a9;--txt:#2c2c2a;--mut:#5f5e5a;--acc:#185FA5;--ok:#3B6D11;--bad:#A32D2D;--warn:#854F0B;--btn:#f7f6f2;--brd:#b4b2a9}
-@media (prefers-color-scheme:dark){:root{--bg:#1a1a19;--ds:#2c2c2a;--scr:#232322;--hinge:#444441;--txt:#f1efe8;--mut:#b4b2a9;--acc:#85B7EB;--ok:#97C459;--bad:#F09595;--warn:#FAC775;--btn:#2c2c2a;--brd:#5f5e5a}}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;user-select:none;-webkit-user-select:none}
-body{display:flex;align-items:center;justify-content:center;padding:16px}
-.ds{background:var(--ds);border-radius:20px;padding:14px;width:100%;max-width:420px}
-.scr{background:var(--scr);border:1px solid var(--brd);border-radius:10px;padding:16px;min-height:210px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
-.hinge{height:16px;margin:8px 36px;border-radius:5px;background:var(--hinge)}
-.pad{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
-.one{grid-template-columns:1fr}
-.three{grid-template-columns:1fr 1fr 1fr;gap:6px}
-button{height:52px;font-size:18px;font-family:inherit;color:var(--txt);background:var(--btn);border:1px solid var(--brd);border-radius:8px}
-button:active{transform:scale(.97)}
-.big{font-size:38px;font-weight:500;letter-spacing:1px;line-height:1.2}
-.title{font-size:24px;font-weight:500;margin:4px 0}
-.mut{font-size:14px;color:var(--mut)}
-.bar{height:6px;background:var(--bg);border-radius:4px;width:100%;margin-top:10px;overflow:hidden}
-.bar div{height:100%;background:var(--acc);width:0}
-.inp{font-size:28px;font-weight:500;height:40px;margin-bottom:8px;border-bottom:1px solid var(--brd);width:100%}
-.dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px}
+:root{color-scheme:light dark;
+  --paper:light-dark(#f3f1ec,#141414);--ink:light-dark(#111,#e9e6df);
+  --mute:light-dark(#5d5a54,#9d988f);--rule:light-dark(#111,#e9e6df);--hair:light-dark(#cfcbc2,#3a3833)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.5 "Source Serif 4",Georgia,serif;overflow-x:clip}
+a{color:inherit;text-decoration:none}
+button,input,select{font:inherit;color:inherit}
+.wrap{max-width:1240px;margin:0 auto;padding:0 max(4vw,14px) 48px}
+
+/* Kopfzeile */
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0 6px;font-size:13px;color:var(--mute);border-bottom:1px solid var(--hair)}
+.top .tools{display:flex;gap:4px}
+.icon{background:none;border:0;min-width:44px;min-height:44px;cursor:pointer;font-size:13px;color:var(--ink);padding:0 8px;letter-spacing:.02em}
+.icon:hover{text-decoration:underline}
+.icon:focus-visible,a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+/* Titelkopf */
+.mast{text-align:center;padding:14px 0 8px}
+.mast h1{font:400 clamp(52px,11vw,112px)/1 "UnifrakturMaguntia",serif;margin:0;letter-spacing:.01em}
+.mast .sub{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;font-style:italic;color:var(--mute);border-top:3px double var(--rule);border-bottom:1px solid var(--rule);margin-top:10px;padding:6px 0}
+.mast .sub span:nth-child(2){font-style:normal;font-variant:small-caps;letter-spacing:.06em;color:var(--ink)}
+
+/* Ressorts */
+nav{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--rule);justify-content:center}
+nav::-webkit-scrollbar{display:none}
+nav button{flex:none;background:none;border:0;min-height:44px;padding:0 12px;cursor:pointer;font-variant:small-caps;letter-spacing:.05em;font-size:16px;color:var(--mute)}
+nav button[aria-current=true]{color:var(--ink);text-decoration:underline;text-underline-offset:6px}
+@media(max-width:700px){nav{justify-content:flex-start}}
+
+.ptr{height:0;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;font-size:13px;font-style:italic;color:var(--mute);transition:height .15s}
+[hidden]{display:none!important}
+.status{font-size:13px;font-style:italic;color:var(--mute);text-align:center;min-height:20px;padding:6px 0}
+
+/* Aufmacher */
+.lead{display:grid;grid-template-columns:minmax(0,1fr);padding:18px 0 22px;border-bottom:3px double var(--rule)}
+.lead h2{font:900 clamp(32px,5.6vw,60px)/1.04 "Playfair Display",Georgia,serif;margin:0 0 12px;text-wrap:balance;text-align:center}
+.lead .meta{text-align:center}
+.lead p{columns:2 300px;column-gap:36px;column-rule:1px solid var(--hair);margin:14px 0 0;hyphens:auto;text-align:justify;font-size:18px}
+.lead p::first-letter{float:left;font:900 4.1em/.8 "Playfair Display",serif;padding:6px 8px 0 0}
+
+/* Spalten */
+.section{padding:20px 0 8px;border-bottom:1px solid var(--rule)}
+.section:last-child{border-bottom:0}
+.section h3{font:700 22px/1.2 "Playfair Display",serif;margin:0 0 14px;display:flex;align-items:baseline;gap:12px}
+.section h3::after{content:"";flex:1;border-top:1px solid var(--rule);transform:translateY(-5px)}
+.cols{columns:3 250px;column-gap:32px;column-rule:1px solid var(--hair)}
+article{break-inside:avoid;padding:0 0 14px;margin:0 0 14px;border-bottom:1px solid var(--hair)}
+article h4{font:700 20px/1.18 "Playfair Display",Georgia,serif;margin:0 0 6px;text-wrap:balance}
+article.big h4{font-size:27px;font-weight:900}
+article p{margin:6px 0 0;font-size:16px;hyphens:auto;text-align:justify;color:var(--ink)}
+.meta{font-size:13px;color:var(--mute);font-variant:small-caps;letter-spacing:.04em}
+.meta time{white-space:nowrap}
+a.read h4,a.read h2{color:var(--mute)}
+a:hover h4,a:hover h2{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+.empty{text-align:center;font-style:italic;color:var(--mute);padding:60px 0}
+
+footer{margin-top:24px;border-top:3px double var(--rule);padding-top:10px;font-size:13px;color:var(--mute);text-align:center;font-style:italic}
+
+/* Einstellungen */
+.dlg{position:fixed;inset:0;background:rgb(0 0 0 / .45);display:none;align-items:flex-start;justify-content:center;padding:4vh 12px;z-index:9;overflow-y:auto}
+.dlg.open{display:flex}
+.panel{background:var(--paper);border:1px solid var(--rule);width:min(640px,100%);padding:20px clamp(16px,4vw,28px) 24px;box-shadow:0 18px 60px rgb(0 0 0 / .3)}
+.panel h2{font:900 30px/1.1 "Playfair Display",serif;margin:0 0 4px}
+.panel h5{font-variant:small-caps;letter-spacing:.06em;font-size:15px;margin:20px 0 6px;font-weight:600;border-bottom:1px solid var(--rule);padding-bottom:4px}
+.panel .hint{font-size:13px;color:var(--mute);font-style:italic;margin:0}
+.feed{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--hair);font-size:15px}
+.feed small{display:block;color:var(--mute);font-size:12.5px;overflow-wrap:anywhere}
+.row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:8px}
+.row.three{grid-template-columns:minmax(0,1fr) minmax(0,2fr) auto}
+input,select{font-size:16px;min-height:44px;padding:6px 10px;border:1px solid var(--rule);background:transparent;border-radius:0}
+select{padding-right:6px}
+.btn{min-height:44px;padding:0 16px;border:1px solid var(--rule);background:var(--ink);color:var(--paper);cursor:pointer;border-radius:0}
+.btn.ghost{background:transparent;color:var(--ink)}
+.x{background:none;border:0;min-width:44px;min-height:44px;cursor:pointer;font-size:20px;color:var(--mute)}
+.panel .end{display:flex;justify-content:space-between;gap:8px;margin-top:22px;flex-wrap:wrap}
+@media(max-width:600px){.row,.row.three{grid-template-columns:minmax(0,1fr)}.mast .sub span:first-child,.mast .sub span:last-child{display:none}.mast .sub{justify-content:center}.lead p{text-align:left}article p{text-align:left}}
+@media(prefers-reduced-motion:no-preference){main{animation:in .5s ease-out}@keyframes in{from{opacity:0}to{opacity:1}}}
 </style>
 </head>
 <body>
-<div class="ds">
-  <div class="scr" id="top"></div>
-  <div class="hinge"></div>
-  <div class="scr" id="bot"></div>
+<div class="ptr" id="ptr" aria-hidden="true"></div>
+<div class="wrap">
+  <div class="top">
+    <span id="updated">Noch nicht geladen</span>
+    <div class="tools">
+      <button class="icon" id="reload" type="button">Neu laden</button>
+      <button class="icon" id="openSettings" type="button">Quellen</button>
+    </div>
+  </div>
+  <header class="mast">
+    <h1>Das Blatt</h1>
+    <div class="sub"><span id="edition">Nr. —</span><span id="today">—</span><span>Unabhängig · aus RSS gesetzt</span></div>
+  </header>
+  <nav id="nav" aria-label="Ressorts"></nav>
+  <div class="status" id="status" role="status"></div>
+  <main id="main"></main>
+  <footer id="foot"></footer>
 </div>
+
+<div class="dlg" id="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgTitle">
+  <div class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:start">
+      <div><h2 id="dlgTitle">Quellen</h2><p class="hint">Jeder RSS- oder Atom-Feed lässt sich einem Ressort zuordnen.</p></div>
+      <button class="x" id="closeSettings" type="button" aria-label="Schließen">×</button>
+    </div>
+    <h5>Abonnierte Feeds</h5>
+    <div id="feedList"></div>
+    <h5>Feed hinzufügen</h5>
+    <form id="addForm">
+      <div class="row three">
+        <input id="fName" placeholder="Name, z. B. Zeit" required>
+        <input id="fUrl" type="url" placeholder="https://…/rss" required>
+        <select id="fSec" aria-label="Ressort"></select>
+      </div>
+      <div style="margin-top:8px"><button class="btn" type="submit">Hinzufügen</button></div>
+    </form>
+    <div id="proxyBox">
+    <h5>Eigener Proxy (optional)</h5>
+    <p class="hint">Viele Nachrichtenseiten blockieren direkte Abrufe aus dem Browser. Die App versucht es direkt und dann über öffentliche Proxys. Hier kannst du einen eigenen eintragen – die Feed-Adresse wird angehängt.</p>
+    <div class="row" style="grid-template-columns:minmax(0,1fr)"><input id="proxy" placeholder="z. B. http://192.168.1.10:8080/?url="></div>
+    </div>
+    <div class="end">
+      <button class="btn ghost" id="resetFeeds" type="button">Standardquellen</button>
+      <button class="btn" id="saveSettings" type="button">Fertig</button>
+    </div>
+  </div>
+</div>
+
 <script>
-var T=document.getElementById('top'),B=document.getElementById('bot');
-var level=1,mode='test',scores=[],queue=[];
-function r(a,b){return Math.floor(Math.random()*(b-a+1))+a}
-function shuffle(a){return a.sort(function(){return Math.random()-0.5})}
-function getBest(l){try{var v=localStorage.getItem('best'+l);return v?+v:null}catch(e){return null}}
-function setBest(l,v){try{localStorage.setItem('best'+l,v)}catch(e){}}
+{
+const SECTIONS = ["Politik","Welt","Wirtschaft","Wissen","Technik","Kultur","Sport"];
+const DEFAULT_FEEDS = [
+  {name:"tagesschau",        url:"https://www.tagesschau.de/xml/rss2/",                               sec:"Politik"},
+  {name:"Zeit Politik",      url:"https://newsfeed.zeit.de/politik/index",                            sec:"Politik"},
+  {name:"Spiegel",           url:"https://www.spiegel.de/schlagzeilen/index.rss",                     sec:"Welt"},
+  {name:"Zeit",              url:"https://newsfeed.zeit.de/index",                                    sec:"Welt"},
+  {name:"Zeit Wirtschaft",   url:"https://newsfeed.zeit.de/wirtschaft/index",                         sec:"Wirtschaft"},
+  {name:"Zeit Wissen",       url:"https://newsfeed.zeit.de/wissen/index",                             sec:"Wissen"},
+  {name:"Spektrum",          url:"https://www.spektrum.de/alias/rss/spektrum-de-rss-feed/996406",     sec:"Wissen"},
+  {name:"heise",             url:"https://www.heise.de/rss/heise-atom.xml",                           sec:"Technik"},
+  {name:"golem",             url:"https://rss.golem.de/rss.php?feed=RSS2.0",                          sec:"Technik"},
+  {name:"Zeit Kultur",       url:"https://newsfeed.zeit.de/kultur/index",                             sec:"Kultur"},
+  {name:"kicker",            url:"https://newsfeed.kicker.de/news/aktuell",                           sec:"Sport"},
+  {name:"sportschau",        url:"https://www.sportschau.de/index~rss2.xml",                          sec:"Sport"}
+];
+const NATIVE = !!window.Native;
+const PUBLIC_PROXIES = [
+  u => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u),
+  u => "https://corsproxy.io/?url=" + encodeURIComponent(u),
+  u => "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(u)
+];
 
-var COLS=[{n:'Rot',c:'#E24B4A'},{n:'Blau',c:'#378ADD'},{n:'Grün',c:'#639922'},{n:'Gelb',c:'#EF9F27'}];
-var LEVELS={
-  1:{names:['Kopfrechnen','Farbwörter','Zahlen merken'],
-     desc:['15 Aufgaben – so schnell wie möglich lösen','Tippe die Farbe der Schrift, nicht das Wort','Merke dir die Ziffern und tippe sie ein'],
-     games:function(){return [math,stroop,memo]},base:80,f:0.6},
-  2:{names:['Kettenrechnen','Uhr ablesen','Rückwärts merken'],
-     desc:['12 Aufgaben mit zwei Rechenschritten – Punkt vor Strich','Welche Uhrzeit zeigt die Uhr?','Merke dir die Ziffern und tippe sie rückwärts ein'],
-     games:function(){return [chain,clock,rev]},base:75,f:0.55}
+const $ = id => document.getElementById(id);
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem("blatt:"+k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem("blatt:"+k, JSON.stringify(v)); }catch(e){} }
 };
+let feeds = store.get("feeds", DEFAULT_FEEDS);
+let proxy = store.get("proxy", "");
+let items = store.get("cache", []);
+let fetchedAt = store.get("fetchedAt", 0);
+let readSet = new Set(store.get("read", []));
+let current = location.hash.slice(1) || "alle";
 
-function menu(){
-  var b1=getBest(1),b2=getBest(2);
-  T.innerHTML='<div class="mut">Gehirntraining</div><div class="title">Kopfjogging</div>'+
-    '<div class="mut">Bestes Gehirnalter<br>Level 1: '+(b1||'–')+' · Level 2: '+(b2||'–')+'</div>';
-  B.innerHTML='<div class="pad one"><button onclick="levelMenu(1)">Level 1 · Einsteiger</button><button onclick="levelMenu(2)">Level 2 · Profi</button></div>';
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const slug = s => s.toLowerCase().replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/[^a-z0-9]+/g,"-");
+
+/* Datum & Ausgabe */
+function masthead(){
+  const d = new Date();
+  $("today").textContent = d.toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+  const start = new Date(d.getFullYear(),0,0);
+  $("edition").textContent = "Nr. " + Math.floor((d - start)/864e5) + " · " + d.getFullYear();
+  $("updated").textContent = fetchedAt ? "Stand " + new Date(fetchedAt).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"}) + " Uhr" : "Noch nicht geladen";
 }
-function levelMenu(l){
-  level=l;var L=LEVELS[l],best=getBest(l);
-  T.innerHTML='<div class="mut">Level '+l+(best?' · Rekord: '+best+' Jahre':'')+'</div><div class="title">'+(l===1?'Einsteiger':'Profi')+'</div><div class="mut">Drei Übungen, dann dein Gehirnalter</div>';
-  B.innerHTML='<div class="pad one"><button onclick="startTest()">Gehirnalter-Test starten</button>'+
-    L.names.map(function(n,i){return '<button onclick="solo('+i+')">Nur '+n+'</button>'}).join('')+
-    '<button onclick="menu()">← Zurück</button></div>';
+
+function ago(t){
+  if(!t) return "";
+  const m = Math.round((Date.now() - t)/6e4);
+  if(m < 1) return "gerade eben";
+  if(m < 60) return "vor " + m + " Min.";
+  if(m < 24*60) return "vor " + Math.round(m/60) + " Std.";
+  return new Date(t).toLocaleDateString("de-DE",{day:"numeric",month:"short"});
 }
-function startTest(){mode='test';scores=[];queue=[0,1,2];next()}
-function solo(i){mode='solo';scores=[];queue=[i];next()}
-function next(){if(!queue.length)return finish();intro(queue.shift())}
-function intro(g){
-  var L=LEVELS[level];
-  T.innerHTML='<div class="mut">Übung</div><div class="title">'+L.names[g]+'</div><div class="mut" style="margin-top:6px">'+L.desc[g]+'</div>';
-  var n=3;B.innerHTML='<div class="big" id="cd">3</div>';
-  var iv=setInterval(function(){n--;if(n>0)document.getElementById('cd').textContent=n;else{clearInterval(iv);L.games()[g]()}},700);
+
+/* Abruf */
+async function get(url, ms = 9000){
+  const ctl = new AbortController(); const timer = setTimeout(() => ctl.abort(), ms);
+  try{
+    const r = await fetch(url, {signal: ctl.signal});
+    if(!r.ok) throw new Error(r.status);
+    const t = await r.text();
+    if(!/<(rss|feed|rdf:RDF|channel)[\s>]/i.test(t)) throw new Error("kein Feed");
+    return t;
+  } finally { clearTimeout(timer); }
 }
-function numpad(onOk){
-  B.innerHTML='<div style="width:100%"><div class="inp" id="inp"></div><div class="pad three" id="np"></div></div>';
-  var np=document.getElementById('np'),inp=document.getElementById('inp'),v='';
-  ['1','2','3','4','5','6','7','8','9','⌫','0','OK'].forEach(function(k){
-    var b=document.createElement('button');b.textContent=k;
-    b.onclick=function(){
-      if(k==='⌫')v=v.slice(0,-1);
-      else if(k==='OK'){if(v!=='')onOk(v,function(){v='';inp.textContent=''})}
-      else if(v.length<10)v+=k;
-      inp.textContent=v;
-    };np.appendChild(b);
+/* In der App: nativer Abruf ohne CORS-Sperre */
+const pending = {};
+let reqId = 0;
+window.__nativeDone = (id, ok, data) => {
+  const p = pending[id]; if(!p) return;
+  delete pending[id]; clearTimeout(p.timer);
+  if(ok && /<(rss|feed|rdf:RDF|channel)[\s>]/i.test(data)) p.resolve(data);
+  else p.reject(new Error(ok ? "kein Feed" : data));
+};
+function nativeFetch(url){
+  return new Promise((resolve, reject) => {
+    const id = "r" + (++reqId);
+    pending[id] = {resolve, reject, timer: setTimeout(() => { delete pending[id]; reject(new Error("Zeitüberschreitung")); }, 30000)};
+    window.Native.fetch(id, url);
   });
 }
-function progress(i,N){return '<div class="bar"><div style="width:'+(i/N*100)+'%"></div></div>'}
-function feedback(right,line){
-  T.innerHTML='<div style="font-size:20px;font-weight:500;color:var(--'+(right?'ok':'bad')+')">'+(right?'✓ Richtig':'✗ Leider falsch')+'</div><div class="mut">'+line+'</div>';
-  B.innerHTML='';
+async function fetchFeed(url){
+  if(NATIVE) return nativeFetch(url);
+  const routes = [];
+  if(proxy) routes.push(proxy + encodeURIComponent(url));
+  routes.push(url, ...PUBLIC_PROXIES.map(p => p(url)));
+  let last;
+  for(const r of routes){ try{ return await get(r); }catch(e){ last = e; } }
+  throw last;
 }
 
-/* Level 1 */
-function math(){var N=15,i=0,ok=0,t0=Date.now(),sol;
-  function gen(){var op=r(0,2),a,b,s,q;
-    if(op===0){a=r(2,49);b=r(2,49);s=a+b;q=a+' + '+b}
-    else if(op===1){a=r(10,60);b=r(1,a);s=a-b;q=a+' − '+b}
-    else{a=r(2,9);b=r(2,9);s=a*b;q=a+' × '+b}
-    T.innerHTML='<div class="mut">Aufgabe '+(i+1)+' von '+N+'</div><div class="big" style="margin:10px 0">'+q+' = ?</div>'+progress(i,N);return s}
-  sol=gen();
-  numpad(function(v,clr){if(+v===sol)ok++;i++;clr();if(i<N)sol=gen();else{var s=(Date.now()-t0)/1000;
-    var pts=Math.max(0,Math.min(100,ok/N*100-Math.max(0,s-25)*1.2));scores.push(pts);result('Kopfrechnen',ok+' / '+N+' richtig',s.toFixed(1)+' Sekunden',pts)}});
+const pick = (el, names) => {
+  for(const n of names){ const x = el.getElementsByTagName(n)[0]; if(x && x.textContent.trim()) return x.textContent.trim(); }
+  return "";
+};
+const plain = html => {
+  const t = new DOMParser().parseFromString(html, "text/html").body.textContent || "";
+  return t.replace(/\s+/g," ").trim();
+};
+function parse(xml, feed){
+  const doc = new DOMParser().parseFromString(xml, "text/xml");
+  if(doc.getElementsByTagName("parsererror").length) throw new Error("unlesbar");
+  const nodes = [...doc.getElementsByTagName("item"), ...doc.getElementsByTagName("entry")];
+  return nodes.slice(0, 25).map(n => {
+    let link = "";
+    const links = [...n.getElementsByTagName("link")];
+    const alt = links.find(l => l.getAttribute("href") && (!l.getAttribute("rel") || l.getAttribute("rel") === "alternate"));
+    link = alt ? alt.getAttribute("href") : (links[0]?.textContent.trim() || pick(n, ["guid"]));
+    const dateStr = pick(n, ["pubDate","published","updated","dc:date"]);
+    let desc = plain(pick(n, ["description","summary","content:encoded","content"]));
+    if(desc.length > 340) desc = desc.slice(0, 330).replace(/\s\S*$/, "") + " …";
+    return {
+      title: plain(pick(n, ["title"])) || "Ohne Titel",
+      link, desc,
+      t: Date.parse(dateStr) || 0,
+      src: feed.name, sec: feed.sec
+    };
+  }).filter(i => i.link);
 }
-function stroop(){var N=12,i=0,ok=0,t0=Date.now(),cur;
-  function gen(){var w=r(0,3),c=r(0,3);if(Math.random()<0.75)while(c===w)c=r(0,3);cur=c;
-    T.innerHTML='<div class="mut">Welche Farbe hat die Schrift? '+(i+1)+'/'+N+'</div><div class="big" style="margin:12px 0;color:'+COLS[c].c+'">'+COLS[w].n+'</div>'+progress(i,N)}
-  B.innerHTML='<div class="pad" id="sp"></div>';var sp=document.getElementById('sp');
-  COLS.forEach(function(c,k){var b=document.createElement('button');b.innerHTML='<span class="dot" style="background:'+c.c+'"></span>'+c.n;
-    b.onclick=function(){if(k===cur)ok++;i++;if(i<N)gen();else{var s=(Date.now()-t0)/1000;
-      var pts=Math.max(0,Math.min(100,ok/N*100-Math.max(0,s-12)*2));scores.push(pts);result('Farbwörter',ok+' / '+N+' richtig',s.toFixed(1)+' Sekunden',pts)}};sp.appendChild(b)});
-  gen();
-}
-function memoGame(name,reverse,speed){var lens=[4,5,6,7,8],i=0,ok=0,maxL=0;
-  function round(){var L=lens[i],d='';for(var k=0;k<L;k++)d+=r(0,9);
-    var want=reverse?d.split('').reverse().join(''):d;
-    T.innerHTML='<div class="mut">Merken! Runde '+(i+1)+'/5</div><div class="big" style="margin:10px 0">'+d.split('').join(' ')+'</div><div class="bar"><div id="mb" style="width:100%;transition:width '+(L*speed)+'s linear"></div></div>';
-    B.innerHTML='<div class="mut">Gut einprägen …'+(reverse?' gleich rückwärts!':'')+'</div>';
-    setTimeout(function(){var mb=document.getElementById('mb');if(mb)mb.style.width='0'},50);
-    setTimeout(function(){
-      T.innerHTML='<div class="mut">'+(reverse?'Jetzt rückwärts eintippen':'Wie lautete die Zahl?')+' ('+L+' Ziffern)</div><div class="big" style="margin:10px 0">'+Array(L+1).join('_ ')+'</div>'+(reverse?'<div class="mut">← letzte Ziffer zuerst</div>':'');
-      numpad(function(v){var right=v===want;if(right){ok++;maxL=L}
-        feedback(right,reverse?'Gezeigt: '+d+' · Rückwärts: '+want:'Gesucht war '+d);
-        i++;setTimeout(function(){if(i<lens.length)round();else{var pts=ok/5*100;scores.push(pts);
-          result(name,ok+' / 5 Runden',maxL?'Längste Zahl: '+maxL+' Ziffern':'Weiter üben',pts)}},1300)});
-    },L*speed*1000+400);
+
+let loading = false;
+async function load(){
+  if(loading) return; loading = true;
+  $("status").textContent = "Die Druckmaschine läuft – " + feeds.length + " Quellen werden abgerufen …";
+  const failed = [];
+  const results = await Promise.all(feeds.map(async f => {
+    try{ return parse(await fetchFeed(f.url), f); }
+    catch(e){ failed.push(f.name); return []; }
+  }));
+  const seen = new Set(), fresh = [];
+  for(const i of results.flat().sort((a,b) => b.t - a.t)){
+    const key = i.title.toLowerCase().slice(0, 60);
+    if(seen.has(i.link) || seen.has(key)) continue;
+    seen.add(i.link); seen.add(key); fresh.push(i);
   }
-  round();
-}
-function memo(){memoGame('Zahlen merken',false,0.6)}
-
-/* Level 2 */
-function chain(){var N=12,i=0,ok=0,t0=Date.now(),sol;
-  function gen(){var a,b,c,q,s,t=r(0,3);
-    if(t===0){a=r(3,12);b=r(3,9);c=r(5,40);s=a*b+c;q=a+' × '+b+' + '+c}
-    else if(t===1){a=r(4,12);b=r(4,9);c=r(1,a*b-1);s=a*b-c;q=a+' × '+b+' − '+c}
-    else if(t===2){b=r(3,9);var x=r(3,12);a=b*x;c=r(10,60);s=x+c;q=c+' + '+a+' : '+b}
-    else{a=r(20,90);b=r(11,49);c=r(5,30);s=a+b-c;q=a+' + '+b+' − '+c}
-    T.innerHTML='<div class="mut">Aufgabe '+(i+1)+' von '+N+'</div><div class="big" style="margin:10px 0">'+q+'</div>'+progress(i,N);return s}
-  sol=gen();
-  numpad(function(v,clr){if(+v===sol)ok++;i++;clr();if(i<N)sol=gen();else{var s=(Date.now()-t0)/1000;
-    var pts=Math.max(0,Math.min(100,ok/N*100-Math.max(0,s-45)*0.9));scores.push(pts);result('Kettenrechnen',ok+' / '+N+' richtig',s.toFixed(1)+' Sekunden',pts)}});
-}
-function fmt(h,m){return h+':'+(m<10?'0':'')+m}
-function face(h,m){var ma=m*6,ha=(h%12)*30+m*0.5,ticks='';
-  for(var k=0;k<12;k++){var a=k*30*Math.PI/180;
-    ticks+='<line x1="'+(60+46*Math.sin(a))+'" y1="'+(60-46*Math.cos(a))+'" x2="'+(60+52*Math.sin(a))+'" y2="'+(60-52*Math.cos(a))+'" stroke="currentColor" stroke-width="'+(k%3?1.5:3)+'"/>'}
-  return '<svg width="150" height="150" viewBox="0 0 120 120" style="color:var(--txt)"><circle cx="60" cy="60" r="56" fill="none" stroke="currentColor" stroke-width="2"/>'+ticks+
-    '<line x1="60" y1="60" x2="60" y2="30" stroke="currentColor" stroke-width="5" stroke-linecap="round" transform="rotate('+ha+' 60 60)"/>'+
-    '<line x1="60" y1="60" x2="60" y2="14" stroke="#378ADD" stroke-width="3" stroke-linecap="round" transform="rotate('+ma+' 60 60)"/>'+
-    '<circle cx="60" cy="60" r="4" fill="currentColor"/></svg>'}
-function clock(){var N=10,i=0,ok=0,t0=Date.now();
-  function gen(){var h=r(1,12),m=r(0,11)*5,right=fmt(h,m),seen={},opts=[right];seen[right]=1;
-    var cands=shuffle([fmt(m/5||12,h*5%60),fmt(h%12+1,m),fmt(h,(m+30)%60),fmt(h===1?12:h-1,m),fmt(h,(m+5)%60),fmt(h,(m+55)%60)]);
-    cands.forEach(function(c){if(!seen[c]&&opts.length<4){seen[c]=1;opts.push(c)}});shuffle(opts);
-    T.innerHTML='<div class="mut">Wie spät ist es? '+(i+1)+'/'+N+'</div>'+face(h,m);
-    B.innerHTML='<div class="pad" id="cp"></div>';var cp=document.getElementById('cp');
-    opts.forEach(function(o){var b=document.createElement('button');b.textContent=o+' Uhr';
-      b.onclick=function(){if(o===right)ok++;i++;if(i<N)gen();else{var s=(Date.now()-t0)/1000;
-        var pts=Math.max(0,Math.min(100,ok/N*100-Math.max(0,s-30)*1.2));scores.push(pts);result('Uhr ablesen',ok+' / '+N+' richtig',s.toFixed(1)+' Sekunden',pts)}};cp.appendChild(b)});
+  if(fresh.length){
+    items = fresh; fetchedAt = Date.now();
+    store.set("cache", items.slice(0, 400)); store.set("fetchedAt", fetchedAt);
   }
-  gen();
+  $("status").textContent = failed.length
+    ? (failed.length === feeds.length ? "Keine Quelle erreichbar – es wird die letzte Ausgabe gezeigt." : "Nicht erreichbar: " + failed.join(", ") + ".")
+    : "";
+  loading = false;
+  masthead(); render();
 }
-function rev(){memoGame('Rückwärts merken',true,0.7)}
 
-function result(n,a,b,pts){
-  T.innerHTML='<div class="mut">'+n+'</div><div class="title">'+a+'</div><div class="mut">'+b+'</div><div style="margin-top:8px;font-size:16px">Punkte: '+Math.round(pts)+' / 100</div>';
-  B.innerHTML='<div class="pad one"><button onclick="next()">'+(queue.length?'Nächste Übung →':(mode==='test'?'Gehirnalter anzeigen →':'Fertig'))+'</button></div>';
+/* Satz */
+function art(i, big){
+  const read = readSet.has(i.link) ? " read" : "";
+  return `<article class="${big ? "big" : ""}"><a class="${read}" href="${esc(i.link)}" target="_blank" rel="noopener" data-link="${esc(i.link)}">
+    <h4>${esc(i.title)}</h4>
+    <div class="meta">${esc(i.src)}${i.t ? ` · <time>${ago(i.t)}</time>` : ""}</div>
+    ${i.desc ? `<p>${esc(i.desc)}</p>` : ""}</a></article>`;
 }
-function finish(){
-  if(mode!=='test')return levelMenu(level);
-  var L=LEVELS[level],avg=scores.reduce(function(a,b){return a+b},0)/scores.length;
-  var age=Math.round(Math.max(20,Math.min(80,L.base-avg*L.f))),best=getBest(level),cmp;
-  if(best===null)cmp='Dein erster Rekord auf Level '+level;
-  else if(age<best)cmp='<span style="color:var(--ok)">Neuer Rekord – '+(best-age)+' Jahre jünger</span>';
-  else if(age===best)cmp='Genau dein Rekord';
-  else cmp='<span style="color:var(--warn)">Rekord: '+best+' Jahre – weiter üben</span>';
-  if(best===null||age<best)setBest(level,age);
-  T.innerHTML='<div class="mut">Dein Gehirnalter (Level '+level+')</div><div style="font-size:60px;font-weight:500;color:var(--acc);line-height:1.1">'+age+'</div><div class="mut">Jahre</div><div style="margin-top:8px;font-size:15px">'+cmp+'</div>';
-  B.innerHTML='<div class="pad one"><button onclick="startTest()">↻ Nochmal versuchen</button><button onclick="levelMenu(level)">Zum Level-Menü</button><button onclick="menu()">Hauptmenü</button></div>';
+function renderNav(){
+  const used = SECTIONS.filter(s => feeds.some(f => f.sec === s));
+  $("nav").innerHTML = ["Alle", ...used].map(s =>
+    `<button type="button" data-s="${slug(s)}" aria-current="${slug(s) === current}">${s}</button>`).join("");
 }
-menu();
+function render(){
+  renderNav();
+  const main = $("main");
+  if(!items.length){
+    main.innerHTML = `<div class="empty">${loading ? "Die erste Ausgabe wird gesetzt …" : "Noch keine Meldungen. Prüfe deine Quellen oder lade neu."}</div>`;
+  } else if(current === "alle"){
+    const lead = items.find(i => i.desc) || items[0];
+    const rest = items.filter(i => i !== lead);
+    let html = `<section class="lead"><a class="${readSet.has(lead.link) ? "read" : ""}" href="${esc(lead.link)}" target="_blank" rel="noopener" data-link="${esc(lead.link)}">
+      <h2>${esc(lead.title)}</h2><div class="meta">${esc(lead.src)} · ${esc(lead.sec)}${lead.t ? ` · <time>${ago(lead.t)}</time>` : ""}</div>
+      ${lead.desc ? `<p>${esc(lead.desc)}</p>` : ""}</a></section>`;
+    for(const s of SECTIONS){
+      const list = rest.filter(i => i.sec === s).slice(0, 6);
+      if(!list.length) continue;
+      html += `<section class="section"><h3>${s}</h3><div class="cols">${list.map((i,k) => art(i, k === 0)).join("")}</div></section>`;
+    }
+    main.innerHTML = html;
+  } else {
+    const sec = SECTIONS.find(s => slug(s) === current);
+    const list = items.filter(i => i.sec === sec);
+    main.innerHTML = list.length
+      ? `<section class="section"><h3>${esc(sec)}</h3><div class="cols">${list.slice(0, 40).map((i,k) => art(i, k === 0)).join("")}</div></section>`
+      : `<div class="empty">In diesem Ressort gibt es gerade keine Meldungen.</div>`;
+  }
+  const srcs = [...new Set(feeds.map(f => f.name))];
+  $("foot").textContent = "Gesetzt aus: " + srcs.join(" · ") + ". Alle Rechte bei den jeweiligen Redaktionen.";
+}
+
+/* Einstellungen */
+function renderFeeds(){
+  $("feedList").innerHTML = feeds.map((f, k) => `<div class="feed">
+    <div>${esc(f.name)}<small>${esc(f.url)}</small></div>
+    <select data-k="${k}" aria-label="Ressort für ${esc(f.name)}">${SECTIONS.map(s => `<option${s === f.sec ? " selected" : ""}>${s}</option>`).join("")}</select>
+    <button class="x" type="button" data-del="${k}" aria-label="${esc(f.name)} entfernen">×</button></div>`).join("")
+    || `<p class="hint">Keine Feeds – füge unten einen hinzu.</p>`;
+}
+let dirty = false;
+function openSettings(){
+  $("fSec").innerHTML = SECTIONS.map(s => `<option>${s}</option>`).join("");
+  $("proxy").value = proxy; renderFeeds(); dirty = false;
+  $("proxyBox").hidden = NATIVE;
+  $("dlg").classList.add("open"); $("closeSettings").focus();
+}
+function closeSettings(){
+  $("dlg").classList.remove("open");
+  const p = $("proxy").value.trim();
+  if(p !== proxy){ proxy = p; store.set("proxy", proxy); dirty = true; }
+  store.set("feeds", feeds);
+  if(dirty) load(); else render();
+}
+
+/* Ereignisse */
+$("nav").addEventListener("click", e => {
+  const b = e.target.closest("button[data-s]"); if(!b) return;
+  current = b.dataset.s;
+  try{ history.replaceState(null, "", current === "alle" ? location.pathname : "#" + current); }catch(err){ location.hash = current; }
+  render(); window.scrollTo({top: 0});
+});
+$("main").addEventListener("click", e => {
+  const a = e.target.closest("a[data-link]"); if(!a) return;
+  readSet.add(a.dataset.link); a.classList.add("read");
+  store.set("read", [...readSet].slice(-600));
+});
+$("reload").addEventListener("click", load);
+$("openSettings").addEventListener("click", openSettings);
+$("closeSettings").addEventListener("click", closeSettings);
+$("saveSettings").addEventListener("click", closeSettings);
+$("dlg").addEventListener("click", e => { if(e.target === $("dlg")) closeSettings(); });
+document.addEventListener("keydown", e => { if(e.key === "Escape" && $("dlg").classList.contains("open")) closeSettings(); });
+$("feedList").addEventListener("change", e => {
+  const k = e.target.dataset.k; if(k === undefined) return;
+  feeds[k].sec = e.target.value;
+  items.forEach(i => { if(i.src === feeds[k].name) i.sec = e.target.value; });
+});
+$("feedList").addEventListener("click", e => {
+  const k = e.target.dataset.del; if(k === undefined) return;
+  const name = feeds[k].name; feeds.splice(k, 1);
+  items = items.filter(i => i.src !== name); renderFeeds();
+});
+$("addForm").addEventListener("submit", e => {
+  e.preventDefault();
+  feeds.push({name: $("fName").value.trim(), url: $("fUrl").value.trim(), sec: $("fSec").value});
+  $("fName").value = ""; $("fUrl").value = ""; dirty = true; renderFeeds();
+});
+$("resetFeeds").addEventListener("click", () => { feeds = DEFAULT_FEEDS.map(f => ({...f})); dirty = true; renderFeeds(); });
+window.addEventListener("hashchange", () => { current = location.hash.slice(1) || "alle"; render(); });
+document.addEventListener("visibilitychange", () => { if(!document.hidden && Date.now() - fetchedAt > 15*6e4) load(); });
+
+/* Zurück-Taste (aus der App aufgerufen): true = behandelt */
+window.back = () => {
+  if($("dlg").classList.contains("open")){ closeSettings(); return true; }
+  if(current !== "alle"){ current = "alle"; render(); window.scrollTo({top: 0}); return true; }
+  return false;
+};
+
+/* Zum Aktualisieren herunterziehen */
+{
+  let y0 = null, dy = 0;
+  const ptr = $("ptr");
+  window.addEventListener("touchstart", e => {
+    if(window.scrollY <= 0 && !$("dlg").classList.contains("open")) y0 = e.touches[0].clientY; else y0 = null;
+  }, {passive: true});
+  window.addEventListener("touchmove", e => {
+    if(y0 === null) return;
+    dy = Math.max(0, Math.min(120, e.touches[0].clientY - y0));
+    ptr.style.height = (dy * .6) + "px";
+    ptr.textContent = dy > 80 ? "Loslassen zum Aktualisieren" : "Zum Aktualisieren ziehen";
+  }, {passive: true});
+  window.addEventListener("touchend", () => {
+    if(y0 !== null && dy > 80) load();
+    y0 = null; dy = 0; ptr.style.height = "0";
+  });
+}
+
+masthead(); render(); load();
+setInterval(() => { masthead(); render(); }, 6e4);
+}
 </script>
 </body>
 </html>

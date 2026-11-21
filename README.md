@@ -1,15 +1,19 @@
-# Kopfjogging
+# Das Blatt
 
-Gehirntraining als Android-App (WebView, komplett offline).
+Minimalistische Nachrichten-App im Stil einer gedruckten Zeitung (Android, WebView).
+Die Meldungen kommen aus RSS- und Atom-Feeds.
 
-- Level 1: Kopfrechnen, Farbwörter, Zahlen merken
-- Level 2: Kettenrechnen, Uhr ablesen, Rückwärts merken
-- Bestes Gehirnalter wird pro Level gespeichert
+- Aufmacher mit großer Schlagzeile, darunter Ressorts in Zeitungsspalten
+- Feeds werden nativ in der App abgerufen, also ohne CORS-Sperre und ohne Proxy
+- Quellen unter „Quellen“ hinzufügen, entfernen und Ressorts zuordnen
+- Gelesene Artikel werden grau, die letzte Ausgabe bleibt offline verfügbar
+- Zum Aktualisieren herunterziehen, Artikel öffnen sich im Browser
+- Hell- und Dunkelmodus folgen dem System
 
 ## APK bekommen
 
-1. Repo auf GitHub hochladen (alle Dateien, inklusive `.github`-Ordner).
-2. Unter **Actions** → „APK bauen“ läuft der Build automatisch (ca. 3–5 Minuten).
-3. Im fertigen Lauf unten bei **Artifacts** „Kopfjogging-APK“ herunterladen, ZIP entpacken, `app-debug.apk` installieren.
+1. Unter **Actions** → „APK bauen“ läuft der Build nach jedem Push automatisch (ca. 2–5 Minuten).
+2. Im fertigen Lauf unten bei **Artifacts** „DasBlatt-APK“ herunterladen, ZIP entpacken, `app-debug.apk` installieren.
 
-Das Spiel selbst liegt in `app/src/main/assets/index.html`.
+Die Oberfläche liegt in `app/src/main/assets/index.html`, der Feed-Abruf in
+`app/src/main/java/de/neroic/dasblatt/MainActivity.java`.

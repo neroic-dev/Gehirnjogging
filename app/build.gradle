@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace 'de.neroic.kopfjogging'
+    namespace 'de.neroic.dasblatt'
     compileSdk 34
 
     defaultConfig {
-        applicationId 'de.neroic.kopfjogging'
+        applicationId 'de.neroic.dasblatt'
         minSdk 21
         targetSdk 34
         versionCode 1
