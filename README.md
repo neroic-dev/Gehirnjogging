@@ -13,8 +13,10 @@ Die Meldungen kommen aus RSS- und Atom-Feeds.
 
 ## APK bekommen
 
-1. Unter **Actions** → „APK bauen“ läuft der Build nach jedem Push automatisch (ca. 2–5 Minuten).
-2. Im fertigen Lauf unten bei **Artifacts** „DasBlatt-APK“ herunterladen, ZIP entpacken, `app-debug.apk` installieren.
+Direkt herunterladen (ohne ZIP, ohne Login):
+**https://github.com/neroic-dev/Gehirnjogging/releases/latest/download/DasBlatt.apk**
+
+Nach jedem Push auf `main` baut GitHub Actions die APK neu (ca. 1–2 Minuten) und ersetzt sie unter diesem Link.
 
 Die Oberfläche liegt in `app/src/main/assets/index.html`, der Feed-Abruf in
 `app/src/main/java/de/neroic/dasblatt/MainActivity.java`.
