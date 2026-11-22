@@ -19,6 +19,7 @@
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.5 "Source Serif 4",Georgia,serif;overflow-x:clip}
 a{color:inherit;text-decoration:none}
+a[data-link]{display:block;cursor:pointer;-webkit-tap-highlight-color:transparent}
 button,input,select{font:inherit;color:inherit}
 .wrap{max-width:1240px;margin:0 auto;padding:0 max(4vw,14px) 48px}
 
@@ -189,6 +190,7 @@ const DEFAULT_FEEDS = [
   {name:"sportschau",        url:"https://www.sportschau.de/index~rss2.xml",                          sec:"Sport"}
 ];
 const NATIVE = !!window.Native;
+const VERSION = "1.2";
 const PUBLIC_PROXIES = [
   u => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u),
   u => "https://corsproxy.io/?url=" + encodeURIComponent(u),
@@ -377,7 +379,7 @@ async function load(){
 /* Satz */
 function art(i, big){
   const read = readSet.has(i.link) ? " read" : "";
-  return `<article class="${big ? "big" : ""}"><a class="${read}" href="${esc(i.link)}" target="_blank" rel="noopener" data-link="${esc(i.link)}">
+  return `<article class="${big ? "big" : ""}"><a class="${read}" role="link" tabindex="0" data-link="${esc(i.link)}">
     <h4>${esc(i.title)}</h4>
     <div class="meta">${esc(i.src)}${i.t ? ` · <time>${ago(i.t)}</time>` : ""}</div>
     ${i.desc ? `<p>${esc(i.desc)}</p>` : ""}</a></article>`;
@@ -395,7 +397,7 @@ function render(){
   } else if(current === "alle"){
     const lead = items.find(i => i.desc) || items[0];
     const rest = items.filter(i => i !== lead);
-    let html = `<section class="lead"><a class="${readSet.has(lead.link) ? "read" : ""}" href="${esc(lead.link)}" target="_blank" rel="noopener" data-link="${esc(lead.link)}">
+    let html = `<section class="lead"><a class="${readSet.has(lead.link) ? "read" : ""}" role="link" tabindex="0" data-link="${esc(lead.link)}">
       <h2>${esc(lead.title)}</h2><div class="meta">${esc(lead.src)} · ${esc(lead.sec)}${lead.t ? ` · <time>${ago(lead.t)}</time>` : ""}</div>
       ${lead.desc ? `<p>${esc(lead.desc)}</p>` : ""}</a></section>`;
     for(const s of SECTIONS){
@@ -412,7 +414,7 @@ function render(){
       : `<div class="empty">In diesem Ressort gibt es gerade keine Meldungen.</div>`;
   }
   const srcs = [...new Set(feeds.map(f => f.name))];
-  $("foot").textContent = "Gesetzt aus: " + srcs.join(" · ") + ". Alle Rechte bei den jeweiligen Redaktionen.";
+  $("foot").textContent = "Gesetzt aus: " + srcs.join(" · ") + ". Alle Rechte bei den jeweiligen Redaktionen. · Version " + VERSION;
 }
 
 /* Einstellungen */
@@ -477,6 +479,7 @@ function closeReader(){
   window.scrollTo({top: readerScroll});
 }
 $("rdClose").addEventListener("click", closeReader);
+$("main").addEventListener("keydown", e => { if(e.key === "Enter" && e.target.matches("a[data-link]")) e.target.click(); });
 $("reload").addEventListener("click", load);
 $("openSettings").addEventListener("click", openSettings);
 $("closeSettings").addEventListener("click", closeSettings);
